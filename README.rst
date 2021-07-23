@@ -1,4 +1,4 @@
-Asrtroids Smasher
+Asteroids Smasher
 =================
 
 .. image:: screenshot.png
