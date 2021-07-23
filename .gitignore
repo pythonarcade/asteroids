@@ -1,0 +1,48 @@
+
+# IDEs
+*.sublime-project
+*.sublime-workspace
+.idea/
+/.vscode/
+*.wpr
+*.wpu
+
+# virualenvs
+env
+venv*/
+.venv
+
+# testing
+.pytest_cache/
+.coveralls.yml
+.tox/
+.mypy_cache/
+tests/test_examples/test.png
+stress_test*.csv
+arcade/examples/test.png
+arcade/examples/stress*.csv
+pylint.html
+
+# covereage
+htmlcov/
+.coverage
+
+# build
+.eggs/
+dist/
+build/
+*.pyc
+doc/_build
+
+# osx
+.DS_Store
+
+# local testing/mocking
+test.py
+pip-wheel-metadata/
+temp/
+
+# Tiled Session for project
+*.tiled-session
+
+doc/api/*.rst
