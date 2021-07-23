@@ -11,6 +11,7 @@ from asteroid_sprite import AsteroidSprite
 from ship_sprite import ShipSprite
 from bullet import Bullet
 from glow_line import GlowLine
+from explosion import ExplosionMaker
 
 
 class GlowBall(Bullet):
@@ -76,6 +77,8 @@ class MyGame(arcade.Window):
         self.glowball_shadertoy = Shadertoy.create_from_file(self.get_size(), "glow_ball.glsl")
         self.glowline_shadertoy = Shadertoy.create_from_file(self.get_size(), "glow_line.glsl")
 
+        self.explosion_list = []
+
     def start_new_game(self):
         """ Set up the game and initialize the variables. """
 
@@ -138,6 +141,8 @@ class MyGame(arcade.Window):
             bullet.draw()
 
         self.bullet_list.draw()
+        for explosion in self.explosion_list:
+            explosion.render()
 
         self.player_sprite_list.draw()
 
@@ -185,6 +190,10 @@ class MyGame(arcade.Window):
                                             shadertoy=self.glowball_shadertoy)
             self.set_bullet_vector(bullet_sprite, 13)
             arcade.play_sound(self.laser_sound)
+
+        elif symbol == arcade.key.E:
+            explosion = ExplosionMaker(self.get_size(), self.player_sprite.position)
+            self.explosion_list.append(explosion)
 
     def fire_circle(self, bullet_color):
         bullet_sprite = GlowBall(glowcolor=bullet_color, radius=5, shadertoy=self.glowball_shadertoy)
@@ -298,11 +307,23 @@ class MyGame(arcade.Window):
             self.asteroid_list.update()
             self.bullet_list.update()
             self.player_sprite_list.update()
+            explosion_list_copy = self.explosion_list.copy()
+            for explosion in explosion_list_copy:
+                explosion.update(x)
+                if explosion.time > .9:
+                    self.explosion_list.remove(explosion)
 
             for bullet in self.bullet_list:
                 asteroids = arcade.check_for_collision_with_list(bullet, self.asteroid_list)
 
+                if len(asteroids) > 0:
+                    explosion = ExplosionMaker(self.get_size(), bullet.position)
+                    self.explosion_list.append(explosion)
+
                 for asteroid in asteroids:
+                    # explosion = ExplosionMaker(self.get_size(), bullet.position)
+                    # self.explosion_list.append(explosion)
+
                     self.split_asteroid(cast(AsteroidSprite, asteroid))  # expected AsteroidSprite, got Sprite instead
                     asteroid.remove_from_sprite_lists()
                     bullet.remove_from_sprite_lists()
