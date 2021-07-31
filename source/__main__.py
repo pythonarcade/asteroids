@@ -1,6 +1,7 @@
 import arcade
 from constants import *
 from start_view import StartView
+from window import Window
 
 
 def main():
@@ -10,7 +11,7 @@ def main():
     arcade.load_font("../fonts/arcade.ttf")
     arcade.load_font("../fonts/SF Atarian System.ttf")
 
-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    window = Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     start_view = StartView()
     window.show_view(start_view)
     arcade.run()

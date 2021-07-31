@@ -61,7 +61,14 @@ class GameView(arcade.View):
 
         # Set up the player
         self.score = 0
-        self.player_sprite = ShipSprite(":resources:images/space_shooter/playerShip1_orange.png", SCALE)
+
+        if len(self.window.joysticks) > 0:
+            joystick = self.window.joysticks[0]
+        else:
+            joystick = None
+        self.player_sprite = ShipSprite(":resources:images/space_shooter/playerShip1_orange.png",
+                                        SCALE,
+                                        joystick)
         self.player_sprite_list.append(self.player_sprite)
         self.lives = 3
 
@@ -117,10 +124,14 @@ class GameView(arcade.View):
 
         # Put the text on the screen.
         output = f"Score: {self.score}"
-        arcade.draw_text(output, 10, 70, arcade.color.WHITE, 13)
+        arcade.draw_text(output, 10, 80, arcade.color.AMBER,
+                         font_size=35,
+                         font_name="Arcade")
 
         output = f"Asteroid Count: {len(self.asteroid_list)}"
-        arcade.draw_text(output, 10, 50, arcade.color.WHITE, 13)
+        arcade.draw_text(output, 10, 40, arcade.color.AMBER,
+                         font_size=35,
+                         font_name="Arcade")
 
     def on_key_press(self, symbol, modifiers):
         """ Called whenever a key is pressed. """

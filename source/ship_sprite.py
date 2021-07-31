@@ -1,5 +1,6 @@
 import arcade
 import math
+from pyglet.input import Joystick
 
 from constants import *
 
@@ -10,7 +11,7 @@ class ShipSprite(arcade.Sprite):
 
     Derives from arcade.Sprite.
     """
-    def __init__(self, filename, scale):
+    def __init__(self, filename, scale, joystick):
         """ Set up the space ship. """
 
         # Call the parent Sprite constructor
@@ -23,6 +24,7 @@ class ShipSprite(arcade.Sprite):
         self.max_speed = 4
         self.drag = 0.05
         self.respawning = 0
+        self.joystick: Joystick = joystick
 
         # Mark that we are respawning.
         self.respawn()
@@ -42,6 +44,10 @@ class ShipSprite(arcade.Sprite):
         """
         Update our position and other particulars.
         """
+        if self.joystick:
+            self.thrust = -self.joystick.y * 0.2
+            self.change_angle = -self.joystick.x * 5
+
         if self.respawning:
             self.respawning += 1
             self.alpha = self.respawning
