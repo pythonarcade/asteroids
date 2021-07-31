@@ -30,11 +30,6 @@ class GameView(arcade.View):
         self.bullet_list = arcade.SpriteList()
         self.ship_life_list = arcade.SpriteList()
 
-        # Set up the player
-        self.score = 0
-        self.player_sprite = None
-        self.lives = 3
-
         # Sounds
         self.laser_sound = arcade.load_sound(":resources:sounds/hurt5.wav")
         self.hit_sound1 = arcade.load_sound(":resources:sounds/explosion1.wav")
@@ -47,7 +42,10 @@ class GameView(arcade.View):
 
         self.explosion_list = []
 
-    def start_new_game(self):
+        for joystick in self.window.joysticks:
+            joystick.push_handlers(self)
+
+    def start_new_game(self, player_count):
         """ Set up the game and initialize the variables. """
 
         self.game_over = False
@@ -59,27 +57,48 @@ class GameView(arcade.View):
         self.bullet_list = arcade.SpriteList()
         self.ship_life_list = arcade.SpriteList()
 
-        # Set up the player
-        self.score = 0
-
         if len(self.window.joysticks) > 0:
             joystick = self.window.joysticks[0]
         else:
             joystick = None
-        self.player_sprite = ShipSprite(":resources:images/space_shooter/playerShip1_orange.png",
-                                        SCALE,
-                                        joystick)
-        self.player_sprite_list.append(self.player_sprite)
-        self.lives = 3
+
+        player_sprite = ShipSprite(":resources:images/space_shooter/playerShip1_orange.png",
+                                   SCALE,
+                                   joystick)
+        self.player_sprite_list.append(player_sprite)
+
+        if player_count > 1:
+            if len(self.window.joysticks) > 1:
+                joystick = self.window.joysticks[1]
+            else:
+                joystick = None
+            player_sprite = ShipSprite(":resources:images/space_shooter/playerShip1_green.png",
+                                       SCALE,
+                                       joystick)
+            self.player_sprite_list.append(player_sprite)
+
+        # Set up the player
+        for player in self.player_sprite_list:
+            player.score = 0
+            player.lives = 3
 
         # Set up the little icons that represent the player lives.
         cur_pos = 10
-        for i in range(self.lives):
+        for i in range(self.player_sprite_list[0].lives):
             life = arcade.Sprite(":resources:images/space_shooter/playerLife1_orange.png", SCALE)
             life.center_x = cur_pos + life.width
             life.center_y = life.height
             cur_pos += life.width
             self.ship_life_list.append(life)
+
+        if len(self.player_sprite_list) > 1:
+            cur_pos = 100
+            for i in range(self.player_sprite_list[1].lives):
+                life = arcade.Sprite(":resources:images/space_shooter/playerLife1_green.png", SCALE)
+                life.center_x = cur_pos + life.width
+                life.center_y = life.height
+                cur_pos += life.width
+                self.ship_life_list.append(life)
 
         # Make the asteroids
         image_list = (":resources:images/space_shooter/meteorGrey_big1.png",
@@ -123,7 +142,8 @@ class GameView(arcade.View):
         self.player_sprite_list.draw()
 
         # Put the text on the screen.
-        output = f"Score: {self.score}"
+
+        output = f"Player 1 Score: {self.player_sprite_list[0].score}"
         arcade.draw_text(output, 10, 80, arcade.color.AMBER,
                          font_size=35,
                          font_name="Arcade")
@@ -133,17 +153,36 @@ class GameView(arcade.View):
                          font_size=35,
                          font_name="Arcade")
 
+    def on_joybutton_press(self, joystick, button):
+        if joystick == self.window.joysticks[0]:
+            player_sprite = self.player_sprite_list[0]
+        else:
+            player_sprite = self.player_sprite_list[1]
+        if button == 0:
+            color = (255, 128, 128)
+            self.fire_circle(color, player_sprite)
+        elif button == 1:
+            color = (255, 255, 255)
+            self.fire_line(color, player_sprite)
+        elif button == 2:
+            bullet_sprite = GlowImageSprite(":resources:images/space_shooter/laserBlue01.png",
+                                            SCALE,
+                                            glowcolor=arcade.color.WHITE,
+                                            shadertoy=self.glowball_shadertoy)
+            self.set_bullet_vector(bullet_sprite, 13, player_sprite)
+            arcade.play_sound(self.laser_sound)
+
     def on_key_press(self, symbol, modifiers):
         """ Called whenever a key is pressed. """
         # Shoot if the player hit the space bar and we aren't respawning.
         if symbol == arcade.key.LEFT:
-            self.player_sprite.change_angle = 3
+            self.player_sprite_list[0].change_angle = 3
         elif symbol == arcade.key.RIGHT:
-            self.player_sprite.change_angle = -3
+            self.player_sprite_list[0].change_angle = -3
         elif symbol == arcade.key.UP:
-            self.player_sprite.thrust = 0.15
+            self.player_sprite_list[0].thrust = 0.15
         elif symbol == arcade.key.DOWN:
-            self.player_sprite.thrust = -.2
+            self.player_sprite_list[0].thrust = -.2
         elif symbol == arcade.key.KEY_1:
             color = (255, 128, 128)
             self.fire_circle(color)
@@ -170,48 +209,44 @@ class GameView(arcade.View):
             self.set_bullet_vector(bullet_sprite, 13)
             arcade.play_sound(self.laser_sound)
 
-        elif symbol == arcade.key.E:
-            explosion = ExplosionMaker(self.get_size(), self.player_sprite.position)
-            self.explosion_list.append(explosion)
-
-    def fire_circle(self, bullet_color):
+    def fire_circle(self, bullet_color, player_sprite):
         bullet_sprite = GlowBall(glowcolor=bullet_color, radius=5, shadertoy=self.glowball_shadertoy)
-        self.set_bullet_vector(bullet_sprite, 5)
+        self.set_bullet_vector(bullet_sprite, 5, player_sprite)
         arcade.play_sound(self.laser_sound)
 
-    def fire_line(self, bullet_color):
-        bullet_sprite = GlowLine(glowcolor=bullet_color, shadertoy=self.glowline_shadertoy, player=self.player_sprite)
-        self.set_bullet_vector(bullet_sprite, 13)
+    def fire_line(self, bullet_color, player_sprite):
+        bullet_sprite = GlowLine(glowcolor=bullet_color, shadertoy=self.glowline_shadertoy, player=player_sprite)
+        self.set_bullet_vector(bullet_sprite, 13, player_sprite)
         arcade.play_sound(self.laser_sound)
 
-    def set_bullet_vector(self, bullet_sprite, bullet_speed):
+    def set_bullet_vector(self, bullet_sprite, bullet_speed, player_sprite):
         bullet_sprite.change_y = \
-            math.cos(math.radians(self.player_sprite.angle)) * bullet_speed
+            math.cos(math.radians(player_sprite.angle)) * bullet_speed
         bullet_sprite.change_x = \
-            -math.sin(math.radians(self.player_sprite.angle)) \
+            -math.sin(math.radians(player_sprite.angle)) \
             * bullet_speed
 
-        bullet_sprite.center_x = self.player_sprite.center_x
-        bullet_sprite.center_y = self.player_sprite.center_y
+        bullet_sprite.center_x = player_sprite.center_x
+        bullet_sprite.center_y = player_sprite.center_y
 
         self.bullet_list.append(bullet_sprite)
 
     def on_key_release(self, symbol, modifiers):
         """ Called whenever a key is released. """
         if symbol == arcade.key.LEFT:
-            self.player_sprite.change_angle = 0
+            self.player_sprite_list[0].change_angle = 0
         elif symbol == arcade.key.RIGHT:
-            self.player_sprite.change_angle = 0
+            self.player_sprite_list[0].change_angle = 0
         elif symbol == arcade.key.UP:
-            self.player_sprite.thrust = 0
+            self.player_sprite_list[0].thrust = 0
         elif symbol == arcade.key.DOWN:
-            self.player_sprite.thrust = 0
+            self.player_sprite_list[0].thrust = 0
 
     def split_asteroid(self, asteroid: AsteroidSprite):
         """ Split an asteroid into chunks. """
         x = asteroid.center_x
         y = asteroid.center_y
-        self.score += 1
+        self.player_sprite_list[0].score += 1
 
         if asteroid.size == 4:
             for i in range(3):
@@ -318,16 +353,17 @@ class GameView(arcade.View):
                 if bullet.center_y > SCREEN_HEIGHT + size:
                     bullet.remove_from_sprite_lists()
 
-            if not self.player_sprite.respawning:
-                asteroids = arcade.check_for_collision_with_list(self.player_sprite, self.asteroid_list)
-                if len(asteroids) > 0:
-                    if self.lives > 0:
-                        self.lives -= 1
-                        self.player_sprite.respawn()
-                        self.split_asteroid(cast(AsteroidSprite, asteroids[0]))
-                        asteroids[0].remove_from_sprite_lists()
-                        self.ship_life_list.pop().remove_from_sprite_lists()
-                        print("Crash")
-                    else:
-                        self.game_over = True
-                        print("Game over")
+            for player in self.player_sprite_list:
+                if not player.respawning:
+                    asteroids = arcade.check_for_collision_with_list(player, self.asteroid_list)
+                    if len(asteroids) > 0:
+                        if player.lives > 0:
+                            player.lives -= 1
+                            player.respawn()
+                            self.split_asteroid(cast(AsteroidSprite, asteroids[0]))
+                            asteroids[0].remove_from_sprite_lists()
+                            self.ship_life_list.pop().remove_from_sprite_lists()
+                            print("Crash")
+                        else:
+                            self.game_over = True
+                            print("Game over")

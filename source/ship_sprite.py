@@ -25,6 +25,8 @@ class ShipSprite(arcade.Sprite):
         self.drag = 0.05
         self.respawning = 0
         self.joystick: Joystick = joystick
+        self.lives = 3
+        self.score = 0
 
         # Mark that we are respawning.
         self.respawn()

@@ -44,12 +44,17 @@ class StartView(arcade.View):
                          anchor_x="center",
                          font_name="SF Atarian System")
 
+        if len(self.window.joysticks) > 1:
+            color = arcade.color.WHITE
+        else:
+            color = arcade.color.GRAY
+
         line_location -= line_height
 
         arcade.draw_text("2 - Start Two Player Game",
                          self.window.width / 2,
                          line_location,
-                         arcade.color.WHITE,
+                         color,
                          font_size=40,
                          anchor_x="center",
                          font_name="SF Atarian System")
@@ -57,5 +62,9 @@ class StartView(arcade.View):
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.KEY_1:
             game_view = GameView()
-            game_view.start_new_game()
+            game_view.start_new_game(1)
+            self.window.show_view(game_view)
+        elif symbol == arcade.key.KEY_2:
+            game_view = GameView()
+            game_view.start_new_game(2)
             self.window.show_view(game_view)
