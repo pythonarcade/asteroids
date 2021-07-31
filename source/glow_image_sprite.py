@@ -5,8 +5,8 @@ from bullet import Bullet
 
 class GlowImageSprite(Bullet):
     """ Sprite that sets its angle to the direction it is traveling in. """
-    def __init__(self, name, scale, shadertoy, glowcolor):
-        super().__init__(name, scale, shadertoy)
+    def __init__(self, name, scale, shadertoy, glowcolor, player_no):
+        super().__init__(name, scale, shadertoy, player_no=player_no)
         self.type = None
         self.shadertoy = shadertoy
         self.glowcolor = glowcolor

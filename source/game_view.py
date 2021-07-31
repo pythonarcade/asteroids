@@ -64,7 +64,9 @@ class GameView(arcade.View):
 
         player_sprite = ShipSprite(":resources:images/space_shooter/playerShip1_orange.png",
                                    SCALE,
-                                   joystick)
+                                   joystick,
+                                   player_no=1,
+                                   player_count=player_count)
         self.player_sprite_list.append(player_sprite)
 
         if player_count > 1:
@@ -74,7 +76,10 @@ class GameView(arcade.View):
                 joystick = None
             player_sprite = ShipSprite(":resources:images/space_shooter/playerShip1_green.png",
                                        SCALE,
-                                       joystick)
+                                       joystick,
+                                       player_no=2,
+                                       player_count=player_count
+                                       )
             self.player_sprite_list.append(player_sprite)
 
         # Set up the player
@@ -144,32 +149,45 @@ class GameView(arcade.View):
         # Put the text on the screen.
 
         output = f"Player 1 Score: {self.player_sprite_list[0].score}"
-        arcade.draw_text(output, 10, 80, arcade.color.AMBER,
-                         font_size=35,
-                         font_name="Arcade")
-
-        output = f"Asteroid Count: {len(self.asteroid_list)}"
         arcade.draw_text(output, 10, 40, arcade.color.AMBER,
                          font_size=35,
                          font_name="Arcade")
 
+        if len(self.player_sprite_list) > 1:
+            output = f"Player 2 Score: {self.player_sprite_list[1].score}"
+            arcade.draw_text(output, 500, 40, arcade.color.AMBER,
+                             font_size=35,
+                             font_name="Arcade")
+
+        output = f"Asteroid Count: {len(self.asteroid_list)}"
+        arcade.draw_text(output, 10, 80, arcade.color.AMBER,
+                         font_size=35,
+                         font_name="Arcade")
+
     def on_joybutton_press(self, joystick, button):
+
+        # What player is this?
         if joystick == self.window.joysticks[0]:
             player_sprite = self.player_sprite_list[0]
         else:
             player_sprite = self.player_sprite_list[1]
+
+        if player_sprite.player_no == 1:
+            color = 255, 128, 128
+        else:
+            color = 128, 255, 128
+
         if button == 0:
-            color = (255, 128, 128)
-            self.fire_circle(color, player_sprite)
+            self.fire_circle(color, player_sprite, player_no=player_sprite.player_no)
         elif button == 1:
-            color = (255, 255, 255)
-            self.fire_line(color, player_sprite)
+            self.fire_line(color, player_sprite, player_no=player_sprite.player_no)
         elif button == 2:
             bullet_sprite = GlowImageSprite(":resources:images/space_shooter/laserBlue01.png",
                                             SCALE,
                                             glowcolor=arcade.color.WHITE,
-                                            shadertoy=self.glowball_shadertoy)
-            self.set_bullet_vector(bullet_sprite, 13, player_sprite)
+                                            shadertoy=self.glowball_shadertoy,
+                                            player_no=player_sprite.player_no)
+            self.set_bullet_vector(bullet_sprite, 10, player_sprite)
             arcade.play_sound(self.laser_sound)
 
     def on_key_press(self, symbol, modifiers):
@@ -209,13 +227,13 @@ class GameView(arcade.View):
             self.set_bullet_vector(bullet_sprite, 13)
             arcade.play_sound(self.laser_sound)
 
-    def fire_circle(self, bullet_color, player_sprite):
-        bullet_sprite = GlowBall(glowcolor=bullet_color, radius=5, shadertoy=self.glowball_shadertoy)
+    def fire_circle(self, bullet_color, player_sprite, player_no):
+        bullet_sprite = GlowBall(glowcolor=bullet_color, radius=5, shadertoy=self.glowball_shadertoy, player_no=player_no)
         self.set_bullet_vector(bullet_sprite, 5, player_sprite)
         arcade.play_sound(self.laser_sound)
 
-    def fire_line(self, bullet_color, player_sprite):
-        bullet_sprite = GlowLine(glowcolor=bullet_color, shadertoy=self.glowline_shadertoy, player=player_sprite)
+    def fire_line(self, bullet_color, player_sprite, player_no):
+        bullet_sprite = GlowLine(glowcolor=bullet_color, shadertoy=self.glowline_shadertoy, player=player_sprite, player_no=player_no)
         self.set_bullet_vector(bullet_sprite, 13, player_sprite)
         arcade.play_sound(self.laser_sound)
 
@@ -246,7 +264,6 @@ class GameView(arcade.View):
         """ Split an asteroid into chunks. """
         x = asteroid.center_x
         y = asteroid.center_y
-        self.player_sprite_list[0].score += 1
 
         if asteroid.size == 4:
             for i in range(3):
@@ -317,53 +334,56 @@ class GameView(arcade.View):
     def on_update(self, x):
         """ Move everything """
 
-        if not self.game_over:
-            self.asteroid_list.update()
-            self.bullet_list.update()
-            self.player_sprite_list.update()
-            explosion_list_copy = self.explosion_list.copy()
-            for explosion in explosion_list_copy:
-                explosion.update(x)
-                if explosion.time > .9:
-                    self.explosion_list.remove(explosion)
+        if self.game_over:
+            return
 
-            for bullet in self.bullet_list:
-                asteroids = arcade.check_for_collision_with_list(bullet, self.asteroid_list)
+        self.asteroid_list.update()
+        self.bullet_list.update()
+        self.player_sprite_list.update()
+        explosion_list_copy = self.explosion_list.copy()
+        for explosion in explosion_list_copy:
+            explosion.update(x)
+            if explosion.time > .9:
+                self.explosion_list.remove(explosion)
 
+        for bullet in self.bullet_list:
+            asteroids = arcade.check_for_collision_with_list(bullet, self.asteroid_list)
+
+            if len(asteroids) > 0:
+                explosion = ExplosionMaker(self.window.get_size(), bullet.position)
+                self.explosion_list.append(explosion)
+
+            for asteroid in asteroids:
+                # explosion = ExplosionMaker(self.get_size(), bullet.position)
+                # self.explosion_list.append(explosion)
+                self.player_sprite_list[bullet.player_no - 1].score += 1
+
+                self.split_asteroid(cast(AsteroidSprite, asteroid))  # expected AsteroidSprite, got Sprite instead
+                asteroid.remove_from_sprite_lists()
+                bullet.remove_from_sprite_lists()
+
+            # Remove bullet if it goes off-screen
+            size = max(bullet.width, bullet.height)
+            if bullet.center_x < 0 - size:
+                bullet.remove_from_sprite_lists()
+            if bullet.center_x > SCREEN_WIDTH + size:
+                bullet.remove_from_sprite_lists()
+            if bullet.center_y < 0 - size:
+                bullet.remove_from_sprite_lists()
+            if bullet.center_y > SCREEN_HEIGHT + size:
+                bullet.remove_from_sprite_lists()
+
+        for player in self.player_sprite_list:
+            if not player.respawning:
+                asteroids = arcade.check_for_collision_with_list(player, self.asteroid_list)
                 if len(asteroids) > 0:
-                    explosion = ExplosionMaker(self.window.get_size(), bullet.position)
-                    self.explosion_list.append(explosion)
-
-                for asteroid in asteroids:
-                    # explosion = ExplosionMaker(self.get_size(), bullet.position)
-                    # self.explosion_list.append(explosion)
-
-                    self.split_asteroid(cast(AsteroidSprite, asteroid))  # expected AsteroidSprite, got Sprite instead
-                    asteroid.remove_from_sprite_lists()
-                    bullet.remove_from_sprite_lists()
-
-                # Remove bullet if it goes off-screen
-                size = max(bullet.width, bullet.height)
-                if bullet.center_x < 0 - size:
-                    bullet.remove_from_sprite_lists()
-                if bullet.center_x > SCREEN_WIDTH + size:
-                    bullet.remove_from_sprite_lists()
-                if bullet.center_y < 0 - size:
-                    bullet.remove_from_sprite_lists()
-                if bullet.center_y > SCREEN_HEIGHT + size:
-                    bullet.remove_from_sprite_lists()
-
-            for player in self.player_sprite_list:
-                if not player.respawning:
-                    asteroids = arcade.check_for_collision_with_list(player, self.asteroid_list)
-                    if len(asteroids) > 0:
-                        if player.lives > 0:
-                            player.lives -= 1
-                            player.respawn()
-                            self.split_asteroid(cast(AsteroidSprite, asteroids[0]))
-                            asteroids[0].remove_from_sprite_lists()
-                            self.ship_life_list.pop().remove_from_sprite_lists()
-                            print("Crash")
-                        else:
-                            self.game_over = True
-                            print("Game over")
+                    if player.lives > 0:
+                        player.lives -= 1
+                        player.respawn()
+                        self.split_asteroid(cast(AsteroidSprite, asteroids[0]))
+                        asteroids[0].remove_from_sprite_lists()
+                        self.ship_life_list.pop().remove_from_sprite_lists()
+                        print("Crash")
+                    else:
+                        self.game_over = True
+                        print("Game over")

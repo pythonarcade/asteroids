@@ -11,7 +11,7 @@ class ShipSprite(arcade.Sprite):
 
     Derives from arcade.Sprite.
     """
-    def __init__(self, filename, scale, joystick):
+    def __init__(self, filename, scale, joystick, player_no, player_count):
         """ Set up the space ship. """
 
         # Call the parent Sprite constructor
@@ -21,12 +21,14 @@ class ShipSprite(arcade.Sprite):
         # Angle comes in automatically from the parent class.
         self.thrust = 0
         self.speed = 0
-        self.max_speed = 4
+        self.max_speed = 3
         self.drag = 0.05
         self.respawning = 0
         self.joystick: Joystick = joystick
         self.lives = 3
         self.score = 0
+        self.player_no = player_no
+        self.player_count = player_count
 
         # Mark that we are respawning.
         self.respawn()
@@ -38,7 +40,8 @@ class ShipSprite(arcade.Sprite):
         """
         # If we are in the middle of respawning, this is non-zero.
         self.respawning = 1
-        self.center_x = SCREEN_WIDTH / 2
+        d = SCREEN_WIDTH / (self.player_count + 1)
+        self.center_x = d * self.player_no
         self.center_y = SCREEN_HEIGHT / 2
         self.angle = 0
 
@@ -47,8 +50,8 @@ class ShipSprite(arcade.Sprite):
         Update our position and other particulars.
         """
         if self.joystick:
-            self.thrust = -self.joystick.y * 0.2
-            self.change_angle = -self.joystick.x * 5
+            self.thrust = -self.joystick.y * 0.1
+            self.change_angle = -self.joystick.x * 3
 
         if self.respawning:
             self.respawning += 1

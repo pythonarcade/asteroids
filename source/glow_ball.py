@@ -3,8 +3,8 @@ from bullet import Bullet
 
 
 class GlowBall(Bullet):
-    def __init__(self, shadertoy, glowcolor, radius):
-        super().__init__(shadertoy=shadertoy)
+    def __init__(self, shadertoy, glowcolor, radius, player_no):
+        super().__init__(shadertoy=shadertoy, player_no=player_no)
         self.type = None
         self.shadertoy = shadertoy
         self.glowcolor = glowcolor

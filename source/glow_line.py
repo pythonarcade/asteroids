@@ -5,8 +5,8 @@ from bullet import Bullet
 
 
 class GlowLine(Bullet):
-    def __init__(self, shadertoy, glowcolor, player):
-        super().__init__(shadertoy=shadertoy)
+    def __init__(self, shadertoy, glowcolor, player, player_no):
+        super().__init__(shadertoy=shadertoy, player_no=player_no)
         self.type = None
         self.shadertoy = shadertoy
         self.glowcolor = glowcolor
