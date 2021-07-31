@@ -11,48 +11,16 @@ from asteroid_sprite import AsteroidSprite
 from ship_sprite import ShipSprite
 from bullet import Bullet
 from glow_line import GlowLine
+from glow_ball import GlowBall
 from explosion import ExplosionMaker
+from glow_image_sprite import GlowImageSprite
 
 
-class GlowBall(Bullet):
-    def __init__(self, shadertoy, glowcolor, radius):
-        super().__init__(shadertoy=shadertoy)
-        self.type = None
-        self.shadertoy = shadertoy
-        self.glowcolor = glowcolor
-        self.texture = arcade.make_circle_texture(radius * 2, glowcolor)
-        self._points = self.texture.hit_box_points
-
-    def draw(self):
-        self.shadertoy.program['pos'] = self.position
-        self.shadertoy.program['color'] = arcade.get_three_float_color(self.glowcolor)
-        self.shadertoy.render()
-
-
-class GlowImageSprite(Bullet):
-    """ Sprite that sets its angle to the direction it is traveling in. """
-    def __init__(self, name, scale, shadertoy, glowcolor, radius):
-        super().__init__(name, scale, shadertoy)
-        self.type = None
-        self.shadertoy = shadertoy
-        self.glowcolor = glowcolor
-
-    def draw(self):
-        self.shadertoy.program['pos'] = self.position
-        self.shadertoy.program['color'] = arcade.get_three_float_color(self.glowcolor)
-        self.shadertoy.render()
-
-    def update(self):
-        """ Move the sprite """
-        super().update()
-        self.angle = math.degrees(math.atan2(self.change_y, self.change_x))
-
-
-class MyGame(arcade.Window):
+class GameView(arcade.View):
     """ Main application class. """
 
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         self.game_over = False
 
@@ -74,8 +42,8 @@ class MyGame(arcade.Window):
         self.hit_sound3 = arcade.load_sound(":resources:sounds/hit1.wav")
         self.hit_sound4 = arcade.load_sound(":resources:sounds/hit2.wav")
 
-        self.glowball_shadertoy = Shadertoy.create_from_file(self.get_size(), "glow_ball.glsl")
-        self.glowline_shadertoy = Shadertoy.create_from_file(self.get_size(), "glow_line.glsl")
+        self.glowball_shadertoy = Shadertoy.create_from_file(self.window.get_size(), "glow_ball.glsl")
+        self.glowline_shadertoy = Shadertoy.create_from_file(self.window.get_size(), "glow_line.glsl")
 
         self.explosion_list = []
 
@@ -186,7 +154,6 @@ class MyGame(arcade.Window):
             bullet_sprite = GlowImageSprite(":resources:images/space_shooter/laserBlue01.png",
                                             SCALE,
                                             glowcolor=arcade.color.WHITE,
-                                            radius=5,
                                             shadertoy=self.glowball_shadertoy)
             self.set_bullet_vector(bullet_sprite, 13)
             arcade.play_sound(self.laser_sound)
@@ -317,7 +284,7 @@ class MyGame(arcade.Window):
                 asteroids = arcade.check_for_collision_with_list(bullet, self.asteroid_list)
 
                 if len(asteroids) > 0:
-                    explosion = ExplosionMaker(self.get_size(), bullet.position)
+                    explosion = ExplosionMaker(self.window.get_size(), bullet.position)
                     self.explosion_list.append(explosion)
 
                 for asteroid in asteroids:
@@ -352,14 +319,3 @@ class MyGame(arcade.Window):
                     else:
                         self.game_over = True
                         print("Game over")
-
-
-def main():
-    """ Start the game """
-    window = MyGame()
-    window.start_new_game()
-    arcade.run()
-
-
-if __name__ == "__main__":
-    main()
