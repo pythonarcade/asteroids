@@ -1,14 +1,18 @@
 import arcade
 from constants import *
-from game_view import GameView
+from start_view import StartView
 
 
 def main():
     """ Start the game """
+
+    # Load fonts
+    arcade.load_font("../fonts/arcade.ttf")
+    arcade.load_font("../fonts/SF Atarian System.ttf")
+
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    start_view = GameView()
+    start_view = StartView()
     window.show_view(start_view)
-    start_view.start_new_game()
     arcade.run()
 
 

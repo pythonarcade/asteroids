@@ -51,6 +51,7 @@ class GameView(arcade.View):
         """ Set up the game and initialize the variables. """
 
         self.game_over = False
+        arcade.set_background_color(arcade.csscolor.BLACK)
 
         # Sprite lists
         self.player_sprite_list = arcade.SpriteList()
