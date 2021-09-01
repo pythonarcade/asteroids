@@ -24,16 +24,7 @@ class StartView(arcade.View):
                          anchor_x="center",
                          font_name="SF Atarian System")
 
-        line_location -= line_height * 2
-
-        arcade.draw_text("I - Instructions",
-                         self.window.width / 2,
-                         line_location,
-                         arcade.color.WHITE,
-                         font_size=40,
-                         anchor_x="center",
-                         font_name="SF Atarian System")
-
+        line_location -= line_height
         line_location -= line_height
 
         arcade.draw_text("1 - Start One Player Game",
@@ -52,6 +43,18 @@ class StartView(arcade.View):
         line_location -= line_height
 
         arcade.draw_text("2 - Start Two Player Game",
+                         self.window.width / 2,
+                         line_location,
+                         color,
+                         font_size=40,
+                         anchor_x="center",
+                         font_name="SF Atarian System")
+
+        line_location -= line_height
+        line_location -= line_height
+        color = arcade.color.WHITE
+
+        arcade.draw_text("Use joysticks to play, or arrow keys to move and number keys to fire.",
                          self.window.width / 2,
                          line_location,
                          color,
