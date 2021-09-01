@@ -203,28 +203,29 @@ class GameView(arcade.View):
             self.player_sprite_list[0].thrust = -.2
         elif symbol == arcade.key.KEY_1:
             color = (255, 128, 128)
-            self.fire_circle(color)
+            self.fire_circle(color, self.player_sprite_list[0], player_no=0)
         elif symbol == arcade.key.KEY_2:
             color = (128, 255, 128)
-            self.fire_circle(color)
+            self.fire_circle(color, self.player_sprite_list[0], player_no=0)
         elif symbol == arcade.key.KEY_3:
             color = (128, 128, 255)
-            self.fire_circle(color)
+            self.fire_circle(color, self.player_sprite_list[0], player_no=0)
         elif symbol == arcade.key.KEY_4:
             color = (255, 128, 255)
-            self.fire_circle(color)
+            self.fire_circle(color, self.player_sprite_list[0], player_no=0)
         elif symbol == arcade.key.KEY_5:
             color = (255, 255, 255)
-            self.fire_line(color)
+            self.fire_line(color, self.player_sprite_list[0], player_no=0)
         elif symbol == arcade.key.KEY_6:
             color = (64, 255, 64)
-            self.fire_line(color)
+            self.fire_line(color, self.player_sprite_list[0], player_no=0)
         elif symbol == arcade.key.KEY_7:
             bullet_sprite = GlowImageSprite(":resources:images/space_shooter/laserBlue01.png",
                                             SCALE,
                                             glowcolor=arcade.color.WHITE,
-                                            shadertoy=self.glowball_shadertoy)
-            self.set_bullet_vector(bullet_sprite, 13)
+                                            shadertoy=self.glowball_shadertoy,
+                                            player_no=0)
+            self.set_bullet_vector(bullet_sprite, 13, self.player_sprite_list[0])
             arcade.play_sound(self.laser_sound)
 
     def fire_circle(self, bullet_color, player_sprite, player_no):
