@@ -229,12 +229,18 @@ class GameView(arcade.View):
             arcade.play_sound(self.laser_sound)
 
     def fire_circle(self, bullet_color, player_sprite, player_no):
-        bullet_sprite = GlowBall(glowcolor=bullet_color, radius=5, shadertoy=self.glowball_shadertoy, player_no=player_no)
+        bullet_sprite = GlowBall(glowcolor=bullet_color,
+                                 radius=5,
+                                 shadertoy=self.glowball_shadertoy,
+                                 player_no=player_no)
         self.set_bullet_vector(bullet_sprite, 5, player_sprite)
         arcade.play_sound(self.laser_sound)
 
     def fire_line(self, bullet_color, player_sprite, player_no):
-        bullet_sprite = GlowLine(glowcolor=bullet_color, shadertoy=self.glowline_shadertoy, player=player_sprite, player_no=player_no)
+        bullet_sprite = GlowLine(glowcolor=bullet_color,
+                                 shadertoy=self.glowline_shadertoy,
+                                 player=player_sprite,
+                                 player_no=player_no)
         self.set_bullet_vector(bullet_sprite, 13, player_sprite)
         arcade.play_sound(self.laser_sound)
 
@@ -348,6 +354,7 @@ class GameView(arcade.View):
                 self.explosion_list.remove(explosion)
 
         for bullet in self.bullet_list:
+            assert isinstance(bullet, Bullet)
             asteroids = arcade.check_for_collision_with_list(bullet, self.asteroid_list)
 
             if len(asteroids) > 0:
@@ -355,8 +362,7 @@ class GameView(arcade.View):
                 self.explosion_list.append(explosion)
 
             for asteroid in asteroids:
-                # explosion = ExplosionMaker(self.get_size(), bullet.position)
-                # self.explosion_list.append(explosion)
+                assert isinstance(asteroid, AsteroidSprite)
                 self.player_sprite_list[bullet.player_no - 1].score += 1
 
                 self.split_asteroid(cast(AsteroidSprite, asteroid))  # expected AsteroidSprite, got Sprite instead
@@ -375,6 +381,7 @@ class GameView(arcade.View):
                 bullet.remove_from_sprite_lists()
 
         for player in self.player_sprite_list:
+            assert isinstance(player, ShipSprite)
             if not player.respawning:
                 asteroids = arcade.check_for_collision_with_list(player, self.asteroid_list)
                 if len(asteroids) > 0:

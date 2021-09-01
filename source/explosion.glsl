@@ -1,4 +1,4 @@
-// Thanks toi The Art of Code
+// Thanks to The Art of Code
 // https://www.youtube.com/watch?v=xDxAnguEOn8
 
 uniform vec2 explosionPos;
@@ -6,7 +6,7 @@ uniform vec2 explosionPos;
 const float TWOPI = 6.2832;
 const float PARTICLE_COUNT = 125.0;
 
-// Function to return two pseudo radom numbers given an input number
+// Function to return two pseudo random numbers given an input number
 // Result is in polar coordinates to make circular rather than square
 // splat.
 vec2 Hash12_Polar(float t) {

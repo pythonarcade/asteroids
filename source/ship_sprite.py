@@ -96,5 +96,3 @@ class ShipSprite(arcade.Sprite):
 
         """ Call the parent class. """
         super().update()
-
-
