@@ -14,7 +14,7 @@ This example is designed to show off using shaders for visual effects.
 
    * - File
      - Description
-   * - `__main__.py <source/constants.py>`_
+   * - `__main__.py <source/__main__.py>`_
      - Bootstrap method that loads the fonts and starts the game.
    * - `asteroid_sprite.py <source/asteroid_sprite.py>`_
      - Sprite that represents an asteroid.
