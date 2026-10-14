@@ -8,6 +8,15 @@ An asteroids clone made with the `Arcade library <https://api.arcade.academy>`_.
 
 This example is designed to show off using shaders for visual effects.
 
+Dependencies
+------------
+
+Make sure to use Python 3.10. You will need to install the following packages:
+
+.. code-block:: console
+
+   pip install -r requirements.txt
+
 .. list-table:: Project Files
    :widths: 25 75
    :header-rows: 1
@@ -40,11 +49,10 @@ This example is designed to show off using shaders for visual effects.
      - GLSL code used to display a glowy-line laser/bullet.
    * - `glow_line.py <source/glow_line.py>`_
      - Python code used to position and render the GLSL bullet code.
-   * - ship_sprite.py
+   * - `ship_sprite.py <source/ship_sprite.py>`_
      - Space ship sprite to represent the player.
    * - `start_view.py <source/start_view.py>`_
      - The starting screen that shows the instructions and allows the user to
        select number of players.
    * - `window.py <source/window.py>`_
      - A subclass of Window that also tracks the joysticks that are plugged in.
-
